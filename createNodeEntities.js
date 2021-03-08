@@ -1,5 +1,5 @@
 const { isObject, flattenArray, isArray } = require('./utils/helpers')
-const uuid = require('uuid/v1')
+const { v4: uuidv4 } = require('uuid')
 
 function getEntityNodeLinks (entities, nodeData) {
   const links = {}
@@ -58,7 +58,7 @@ function buildEntity ({
   const dataWithoutChildEntities = getDataWithoutChildEntities(data, childNodeKeys)
   const entityNodeLinks = getEntityNodeLinks(childEntities, data)
   return [{
-    id: createNodeId(name + uuid()),
+    id: createNodeId(name + uuidv4()),
     name,
     data: dataWithoutChildEntities,
     links: entityNodeLinks,
