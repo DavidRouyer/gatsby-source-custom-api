@@ -1,9 +1,8 @@
 const getTypeDef = (name, schema, imageKeys) => {
-  const local = imageKeys.includes(name) ? 'local: File' : ''
   return `
     type ${name} implements Node {
       ${schema}
-      ${local}
+      ${imageKeys.includes(name) ? 'local: File' : ''}
     }
   `
 }
