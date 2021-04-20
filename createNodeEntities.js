@@ -1,4 +1,4 @@
-const { isObject, flattenArray, isArray } = require('./utils/helpers')
+const { flatten, isObject, isArray } = require('lodash')
 const { v4: uuidv4 } = require('uuid')
 
 const getEntityNodeLinks = (entities, nodeData) => {
@@ -45,7 +45,7 @@ const buildEntity = ({
   name, data, schemas, createNodeId
 }) => {
   const childNodeKeys = getChildNodeKeys(data, schemas)
-  const childEntities = flattenArray(
+  const childEntities = flatten(
     childNodeKeys.map(key => (
       createNodeEntities({
         name: key,
@@ -88,7 +88,7 @@ const createNodeEntities = ({
       schemas,
       createNodeId
     }))
-    return flattenArray(entitiesArray)
+    return flatten(entitiesArray)
   }
   if (isObject(data)) {
     return buildEntity({
