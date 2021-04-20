@@ -1,14 +1,14 @@
-function removeChildEntities (ent) {
-  const { childEntities, ...rest } = ent
+const removeChildEntities = (entity) => {
+  const { childEntities, ...rest } = entity
   return rest
 }
 
-function flattenEntities (entities, flat) {
+const flattenEntities = (entities, flat) => {
   let flatEntities = flat || []
-  entities.forEach((ent) => {
-    flatEntities = [...flatEntities, removeChildEntities(ent)]
-    if (ent.childEntities) {
-      flatEntities = flattenEntities(ent.childEntities, flatEntities)
+  entities.forEach((entity) => {
+    flatEntities = [removeChildEntities(entity), ...flatEntities]
+    if (entity.childEntities) {
+      flatEntities = flattenEntities(entity.childEntities, flatEntities)
     }
   })
   return flatEntities

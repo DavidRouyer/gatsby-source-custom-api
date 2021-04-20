@@ -1,10 +1,10 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
-function isImageKey (key, imageKeys) {
+const isImageKey = (key, imageKeys) => {
   return imageKeys.includes(key)
 }
 
-async function createImageNodes ({
+const createImageNodes = async ({
   entity,
   createNode,
   createNodeId,
@@ -12,7 +12,7 @@ async function createImageNodes ({
   cache,
   imageName,
   imageCacheKey
-}) {
+}) => {
   let fileNode
   try {
     fileNode = await createRemoteFileNode({
@@ -42,7 +42,7 @@ async function createImageNodes ({
   return entity
 }
 
-function extensionIsValid (url) {
+const extensionIsValid = (url) => {
   const ext = url.split('.').pop().split('/')[0]
   switch (ext) {
     case 'jpg':
@@ -54,9 +54,9 @@ function extensionIsValid (url) {
   }
 }
 
-async function loadImages ({
+const loadImages = async ({
   entities, imageKeys, createNode, createNodeId, store, cache, touchNode
-}) {
+}) => {
   return Promise.all(
     entities.map(async (entity) => {
       if (!isImageKey(entity.name, imageKeys) || !entity.data.url) {

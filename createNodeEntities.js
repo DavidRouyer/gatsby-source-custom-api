@@ -1,7 +1,7 @@
 const { isObject, flattenArray, isArray } = require('./utils/helpers')
 const { v4: uuidv4 } = require('uuid')
 
-function getEntityNodeLinks (entities, nodeData) {
+const getEntityNodeLinks = (entities, nodeData) => {
   const links = {}
   entities.forEach((entity) => {
     const { name } = entity
@@ -22,7 +22,7 @@ function getEntityNodeLinks (entities, nodeData) {
   return links
 }
 
-function getChildNodeKeys (data, schemas) {
+const getChildNodeKeys = (data, schemas) => {
   if (!data) return []
   return Object.keys(data).filter((key) => {
     if (isObject(data[key])) return true
@@ -33,7 +33,7 @@ function getChildNodeKeys (data, schemas) {
   })
 }
 
-function getDataWithoutChildEntities (data, childNodeKeys) {
+const getDataWithoutChildEntities = (data, childNodeKeys) => {
   const newData = { ...data }
   childNodeKeys.forEach((key) => {
     delete newData[key]
@@ -41,9 +41,9 @@ function getDataWithoutChildEntities (data, childNodeKeys) {
   return newData
 }
 
-function buildEntity ({
+const buildEntity = ({
   name, data, schemas, createNodeId
-}) {
+}) => {
   const childNodeKeys = getChildNodeKeys(data, schemas)
   const childEntities = flattenArray(
     childNodeKeys.map(key => (
@@ -66,7 +66,7 @@ function buildEntity ({
   }]
 }
 
-function normalizeData (name, data, schemas) {
+const normalizeData = (name, data, schemas) => {
   const schema = schemas[name]
   if (!data) return { dummy: true }
   if (!Object.keys(data).length && !schema) {
@@ -78,9 +78,9 @@ function normalizeData (name, data, schemas) {
   return data
 }
 
-function createNodeEntities ({
+const createNodeEntities = ({
   name, data, createNodeId, schemas
-}) {
+}) => {
   if (isArray(data)) {
     const entitiesArray = data.map(d => buildEntity({
       name,
