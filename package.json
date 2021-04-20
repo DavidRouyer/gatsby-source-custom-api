@@ -1,10 +1,10 @@
 {
   "name": "@davidrouyer/gatsby-source-custom-api",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Source data from any API and transform it into Gatsby-nodes. Download your image files and use them with Gatsby Image.",
   "main": "index.js",
-  "author": "Andreas Faust",
-  "license": "ISC",
+  "author": "David Rouyer",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/AndreasFaust/gatsby-source-custom-api"
