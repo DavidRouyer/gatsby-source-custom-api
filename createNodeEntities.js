@@ -1,4 +1,4 @@
-const { flatten, isObject, isArray } = require('lodash')
+const { every, flatten, isObjectLike, isArray } = require('lodash')
 const { v4: uuidv4 } = require('uuid')
 
 const getEntityNodeLinks = (entities, nodeData) => {
@@ -25,10 +25,10 @@ const getEntityNodeLinks = (entities, nodeData) => {
 const getChildNodeKeys = (data, schemas) => {
   if (!data) return []
   return Object.keys(data).filter((key) => {
-    if (isObject(data[key])) return true
-    if (isArray(data[key]) && schemas[key]) {
+    if (isArray(data[key]) && every(data[key], isObjectLike)) {
       return true
     }
+    if (isObjectLike(data[key]) && !isArray(data[key])) return true
     return false
   })
 }
@@ -81,7 +81,7 @@ const normalizeData = (name, data, schemas) => {
 const createNodeEntities = ({
   name, data, createNodeId, schemas
 }) => {
-  if (isArray(data)) {
+  if (isArray(data) && every(data, isObjectLike)) {
     const entitiesArray = data.map(d => buildEntity({
       name,
       data: normalizeData(name, d, schemas),
@@ -90,7 +90,7 @@ const createNodeEntities = ({
     }))
     return flatten(entitiesArray)
   }
-  if (isObject(data)) {
+  if (isObjectLike(data) && !isArray(data)) {
     return buildEntity({
       name,
       data: normalizeData(name, data, schemas),

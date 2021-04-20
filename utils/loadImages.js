@@ -1,11 +1,7 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
-const isImageKey = (key, imageKeys) => {
-  return imageKeys.includes(key)
-}
-
-const createImageNodes = async ({
-  entity,
+const createImageNode = async ({
+  node,
   createNode,
   createNodeId,
   store,
@@ -16,11 +12,12 @@ const createImageNodes = async ({
   let fileNode
   try {
     fileNode = await createRemoteFileNode({
-      url: entity.data.url,
-      store,
-      cache,
+      url: node.url,
+      parentNodeId: node.id,
       createNode,
-      createNodeId
+      createNodeId,
+      cache,
+      store,
     })
   } catch (e) {
     console.log(e)
@@ -28,18 +25,12 @@ const createImageNodes = async ({
   if (fileNode) {
     await cache.set(imageCacheKey, {
       fileNodeID: fileNode.id,
-      modified: entity.data.modified
+      modified: node.modified
     })
     console.log('Image downloaded: ' + imageName)
-    return {
-      ...entity,
-      links: {
-        ...entity.links,
-        local___NODE: fileNode.id
-      }
-    }
+
+    node.local___NODE = fileNode.id;
   }
-  return entity
 }
 
 const extensionIsValid = (url) => {
@@ -55,49 +46,46 @@ const extensionIsValid = (url) => {
 }
 
 const loadImages = async ({
-  entities, imageKeys, createNode, createNodeId, store, cache, touchNode
+  node,
+  createNode,
+  createNodeId,
+  store,
+  cache,
+  touchNode
 }) => {
-  return Promise.all(
-    entities.map(async (entity) => {
-      if (!isImageKey(entity.name, imageKeys) || !entity.data.url) {
-        return Promise.resolve(entity)
-      }
-      if (!extensionIsValid(entity.data.url)) {
-        console.log(`Image-Extension not valid: ${entity.data.url}`)
-        return Promise.resolve(entity)
-      }
-      const imageName = entity.data.url.match(/([^/]*)\/*$/)[1]
-      const imageCacheKey = `local-image-${imageName}`
-      const cachedImage = await cache.get(imageCacheKey)
-      // If we have cached image and it wasn't modified, reuse
-      // previously created file node to not try to redownload
-      if (
-        cachedImage &&
-        entity.data.modified &&
-        entity.data.modified === cachedImage.modified
-      ) {
-        const { fileNodeID } = cachedImage
-        touchNode({ nodeId: fileNodeID })
-        console.log('Image from Cache: ' + imageName)
-        return Promise.resolve({
-          ...entity,
-          links: {
-            ...entity.links,
-            local___NODE: fileNodeID
-          }
-        })
-      }
-      return createImageNodes({
-        entity,
-        createNode,
-        createNodeId,
-        store,
-        cache,
-        imageName,
-        imageCacheKey
-      })
+  if (!node.url) {
+    return
+  }
+  if (!extensionIsValid(node.url)) {
+    console.log(`Image-Extension not valid: ${node.url}`)
+    return
+  }
+  const imageName = node.url.match(/([^/]*)\/*$/)[1]
+  const imageCacheKey = `local-image-${imageName}`
+  const cachedImage = await cache.get(imageCacheKey)
+  // If we have cached image and it wasn't modified, reuse
+  // previously created file node to not try to redownload
+  if (
+    cachedImage &&
+    node.modified &&
+    node.modified === cachedImage.modified
+  ) {
+    const { fileNodeID } = cachedImage
+    touchNode({ nodeId: fileNodeID })
+    console.log('Image from Cache: ' + imageName)
+
+    node.local___NODE = fileNodeID
+  } else {
+    createImageNode({
+      node,
+      createNode,
+      createNodeId,
+      store,
+      cache,
+      imageName,
+      imageCacheKey
     })
-  )
+  }
 }
 
 module.exports = loadImages

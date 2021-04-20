@@ -2,7 +2,7 @@ const getTypeDef = (name, schema, imageKeys) => {
   return `
     type ${name} implements Node {
       ${schema}
-      ${imageKeys.includes(name) ? 'local: File' : ''}
+      ${imageKeys.includes(name) ? 'local: File @link(from: "local___NODE")' : ''}
     }
   `
 }

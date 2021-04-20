@@ -7,13 +7,45 @@ const getUrl = require('./utils/getUrl')
 const getTypeDefs = require('./utils/getTypeDefs')
 const buildNode = require('./utils/buildNode')
 
+exports.createSchemaCustomization = ({
+  actions: { createTypes }
+}, configOptions) => {
+  const {
+    imageKeys = ['image'],
+    schemas = {}
+  } = configOptions
+
+  const typeDefs = getTypeDefs(schemas, imageKeys)
+
+  createTypes(typeDefs)
+}
+
+exports.onCreateNode = async ({
+  node,
+  actions: { createNode, touchNode },
+  store,
+  cache,
+  createNodeId,
+}, configOptions) => {
+  const {
+    imageKeys = ['image']
+  } = configOptions
+
+  if (
+    imageKeys.includes(node.internal.type)
+  ) {
+    loadImages({ node, createNode, createNodeId, store, cache, touchNode });
+  }
+}
+
 exports.sourceNodes = async (
   {
-    actions, createNodeId, createContentDigest, store, cache
+    actions: { createNode },
+    createNodeId,
+    createContentDigest
   },
   configOptions
 ) => {
-  const { createNode, createTypes, touchNode } = actions
   const {
     url,
     headers,
@@ -25,8 +57,6 @@ exports.sourceNodes = async (
   const URL = getUrl(process.env.NODE_ENV, url)
   const data = await fetch(URL, { headers }).then(res => res.json()).catch(err => console.log(err))
 
-  const typeDefs = getTypeDefs(schemas, imageKeys)
-  createTypes(typeDefs)
 
   // build entities and correct schemas, where necessary
   let entities = flattenEntities(createNodeEntities({
@@ -41,11 +71,6 @@ exports.sourceNodes = async (
     ...entity,
     data: normalizeKeys(entity.data)
   }))
-
-  // load images or default-dummy-image
-  entities = await loadImages({
-    entities, imageKeys, createNode, createNodeId, touchNode, store, cache, createContentDigest
-  })
 
   // build gatsby-node-object
   entities = entities.map(entity => buildNode({ entity, createContentDigest }))
